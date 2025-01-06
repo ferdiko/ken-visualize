@@ -3,4 +3,3 @@ streamlit-plotly-events
 streamlit_theme
 pandas
 numpy
-streamlit_theme
