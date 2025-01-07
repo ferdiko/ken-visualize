@@ -52,12 +52,20 @@ col1, col2 = st.columns([2, 2.5])  # Adjust the proportions (e.g., 2:3 for left:
 # Left column: Text box
 with col1:    
     st.subheader("Deploy LLMs with Ken")
-    st.empty().text("Ken allows you to deploy and query LLMs without having to guesstimate which LLM best suits your application needs.")
+    st.empty().text("Ken allows you to deploy and query LLMs without having to guesstimate which LLM best suits your application needs. To fit your precise needs, Ken offers a high-resolution cost-accuracy trade-off.")
 
 # Dropdown menu to choose data (preserved outside column context)
 with col1:
     options = ["MT-Bench", "HellaSwag", "MMLU"]
     selected_option = st.selectbox("Choose a benchmark:", options)
+
+    # Advanced options
+    with st.expander("Declare workload and hardware"):
+        st.write('''
+            The chart above shows some numbers I picked for you.
+            I rolled actual dice for these, so they're *guaranteed* to
+            be random.
+        ''')
 
 # Map selected option to corresponding data
 if selected_option == "MT-Bench":
@@ -70,8 +78,8 @@ else:
 with col1:
     data_point_display = st.empty()
     st.markdown(
-        """2. **Create an endpoint** with Ken:\
-            -- **Install ken-llm:** ```pip install ken-llm``` or [build from source](https://stackoverflow.com/).\
+        """2. **Create an endpoint** with Ken:\\
+            -- **Install ken-llm:** ```pip install ken-llm``` or [build from source](https://stackoverflow.com/).\\
             --  **Configure:** Copy the hash above and paste it as shown [in the examples](https://stackoverflow.com/). 
             """
     )
@@ -101,11 +109,22 @@ with col2:
         title=None
     )
 
-    # Default Plotly-blue marker color
+    # Update traces for hover styling and formatting
     fig.update_traces(
-        marker=dict(color="#636EFA", size=10),
-        selector=dict(mode='markers')
+        marker=dict(color="#636EFA", size=12),
+        selector=dict(mode='markers'),
+        hoverlabel=dict(
+            bgcolor="rgba(240, 240, 240, 0.5)",
+            font=dict(color="#333333", size=14),  # Dark text with slightly larger font
+            bordercolor="#cccccc",  # Subtle border color
+            # padding=10  # More padding inside the hover box
+        ),
+        hovertemplate=(
+            "<span style='font-size:16px'><b>Accuracy:</b> %{y:.1f}%</span><br>"
+            "<span style='font-size:16px'><b>Latency:</b>  %{x:.1f} ms</span>"
+        )
     )
+
 
     # Update X axis
     fig.update_xaxes(
@@ -161,8 +180,8 @@ with col2:
         label = current_data.iloc[point_index]['label']
 
         data_point_display.markdown(
-            f"""1. **Click** on a configuration on the right based on the accuracy and latency requirements of your application:
-            
+            f"""1. The configuration's hash lets you declare this configuration to Ken.
+
             Chosen configuration:
             Accuracy:  {accuracy:.2f}
             Latency:   {latency:.2f}
