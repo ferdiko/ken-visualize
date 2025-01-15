@@ -124,8 +124,8 @@ with col2:
             # padding=10  # More padding inside the hover box
         ),
         hovertemplate=(
-            "<span style='font-size:16px'><b>MT-Bench Score:</b> %{y:.1f}%</span><br>"
-            "<span style='font-size:16px'><b>p95 TTFT (ms):</b>  %{x:.1f} ms</span>"
+            "<span style='font-size:16px'><b>MT-Bench Score:</b> %{y:.1f}</span><br>"
+            "<span style='font-size:16px'><b>p95 TTFT:</b>  %{x:.1f} ms</span>"
         )
     )
 
