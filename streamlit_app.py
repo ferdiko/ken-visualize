@@ -10,23 +10,27 @@ st.set_page_config(layout="wide")
 
 # Generate random data
 np.random.seed(42)
-data_option_1 = pd.DataFrame({
-    'p95 Latency (ms)': np.random.rand(50),
-    'Accuracy (%)': np.random.rand(50),
-    'label': [f"Option 1 - Point {i}" for i in range(50)]
-})
 
-data_option_2 = pd.DataFrame({
-    'p95 Latency (ms)': np.random.rand(50) * 2,
-    'Accuracy (%)': np.random.rand(50) * 2,
-    'label': [f"Option 2 - Point {i}" for i in range(50)]
-})
+data_mt_bench = pd.read_json('data/mt_bench.json')
 
-data_option_3 = pd.DataFrame({
-    'p95 Latency (ms)': np.random.rand(50) * 3,
-    'Accuracy (%)': np.random.rand(50) * 3,
-    'label': [f"Option 3 - Point {i}" for i in range(50)]
-})
+
+# data_option_1 = pd.DataFrame({
+#     'p95 Latency (ms)': [515.2667999267578, 515.9493446350098, 541.0978794097899, 547.9301929473876, 549.250555038452, 552.0882129669188, 585.1516246795653, 600.8272171020508, 913.4064197540279, 945.2121257781982, 950.4408836364746, 950.4849910736084, 977.4526119232177, 1429.4769763946533, 1431.3950538635254, 1520.143985748291, 1696.936273574829, 1724.5442867279053, 46.429538726806626, 96.96412086486816, 200.61945915222168, 2783.5001945495605, 97.82152175903319, 98.40869903564453, 268.88322830200195, 456.26745223999023, 895.2450752258301, 1434.027910232544, 1698.83394241333, 2845.336675643921, 514.8739337921143, 547.2744464874266, 943.9239501953125, 1798.0921268463135, 1800.3742694854736, 187.2, 80.99, 55.02, 3041, 50.4, 94.0, 1878.9772, 70.12],
+#     'Score': [5.439775910364146, 6.793785310734464, 6.824858757062147, 6.929775280898877, 7.401129943502825, 7.511299435028248, 7.528248587570621, 7.573446327683616, 7.677966101694915, 7.748587570621469, 7.796610169491525, 7.8192090395480225, 7.861581920903955, 7.8841807909604515, 7.898305084745763, 7.943342776203966, 7.9491525423728815, 7.954674220963173, 4.728291316526611, 6.677871148459384, 6.697478991596639, 7.985994397759104, 6.773109243697479, 6.80672268907563, 7.372549019607843, 7.490196078431373, 7.649859943977591, 7.8655462184873945, 7.9411764705882355, 7.985994397759104, 5.249299719887955, 6.809523809523809, 7.49859943977591, 7.635854341736695, 7.890756302521009, 7.17, 6.205, 5.5594, 8.0198, 5.184, 6.4557, 7.998, 5.971],
+#     'label': [f"Option 1 - Point {i}" for i in range(50)]
+# })
+
+# data_option_2 = pd.DataFrame({
+#     'p95 Latency (ms)': np.random.rand(50) * 2,
+#     'Accuracy (%)': np.random.rand(50) * 2,
+#     'label': [f"Option 2 - Point {i}" for i in range(50)]
+# })
+
+# data_option_3 = pd.DataFrame({
+#     'p95 Latency (ms)': np.random.rand(50) * 3,
+#     'Accuracy (%)': np.random.rand(50) * 3,
+#     'label': [f"Option 3 - Point {i}" for i in range(50)]
+# })
 
 # Detect Streamlit theme mode. May not be initialized yet during some runs.
 theme_data = st_theme()
@@ -68,8 +72,8 @@ with col1:
         ''')
 
 # Map selected option to corresponding data
-if selected_option == "MT-Bench":
-    current_data = data_option_1
+if True or selected_option == "MT-Bench":
+    current_data = data_mt_bench
 elif selected_option == "HellaSwag":
     current_data = data_option_2
 else:
@@ -91,9 +95,9 @@ with col2:
     # Create scatter plot (no title)
     fig = px.scatter(
         current_data, 
-        x='p95 Latency (ms)', 
-        y='Accuracy (%)', 
-        # hover_data=['label']
+        x='p95 Time To First Token (ms)', 
+        y='MT-Bench Score', 
+        hover_data=['Gear Plan']
     )
 
     # Disable default template so it doesn't override colors
@@ -120,8 +124,8 @@ with col2:
             # padding=10  # More padding inside the hover box
         ),
         hovertemplate=(
-            "<span style='font-size:16px'><b>Accuracy:</b> %{y:.1f}%</span><br>"
-            "<span style='font-size:16px'><b>Latency:</b>  %{x:.1f} ms</span>"
+            "<span style='font-size:16px'><b>MT-Bench Score:</b> %{y:.1f}%</span><br>"
+            "<span style='font-size:16px'><b>p95 TTFT (ms):</b>  %{x:.1f} ms</span>"
         )
     )
 
@@ -175,17 +179,18 @@ with col2:
     # Handle click data to show text on the left
     if selected_points:
         point_index = selected_points[0]['pointIndex']
-        accuracy = current_data.iloc[point_index]['Accuracy (%)']
-        latency = current_data.iloc[point_index]['p95 Latency (ms)']
-        label = current_data.iloc[point_index]['label']
+
+        accuracy = current_data.iloc[point_index]['MT-Bench Score']
+        latency = current_data.iloc[point_index]['p95 Time To First Token (ms)']
+        label = current_data.iloc[point_index]['Gear Plan']
 
         data_point_display.markdown(
             f"""1. The configuration's hash lets you declare this configuration to Ken.
 
             Chosen configuration:
-            Accuracy:  {accuracy:.2f}
-            Latency:   {latency:.2f}
-            Hash:      {label}""",
+            MT-Bench Score:    {accuracy:.2f}
+            p95 TTFT:          {latency:.2f} ms
+            Cofiguration:      {label}""",
             unsafe_allow_html=True
         )
 
