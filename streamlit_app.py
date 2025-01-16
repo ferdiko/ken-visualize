@@ -107,7 +107,7 @@ with col1:
         # Integer input field
         st.markdown("**Or model query load after Poisson distribution**", unsafe_allow_html=True)
     
-        lambda_value = st.number_input("Lambda (integer, higher value --> higher query load):", min_value=1, step=1, value=3, help="Lambda parameterizes the Poisson distribution.")
+        lambda_value = st.number_input("Lambda (integer, higher value --> heavier query load):", min_value=1, step=1, value=3, help="Lambda parameterizes the Poisson distribution.")
 
         # Generate Poisson distribution data for 5 minutes (300 seconds)
         time = np.arange(0, 300, 1)  # 300 seconds
