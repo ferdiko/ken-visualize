@@ -64,7 +64,7 @@ col1, col2 = st.columns([2, 2.5])  # Adjust the proportions (e.g., 2:3 for left:
 
 # Left column: Text box
 with col1:    
-    st.subheader("Deploy LLMs with Ken")
+    st.header("Deploy LLMs with Ken")
     st.empty().text('''Ken allows you to deploy and query LLMs without having to guesstimate which LLM best suits your application needs. \
     To fit your precise needs, Ken offers a high-resolution cost-accuracy trade-off.
     ''')
@@ -148,7 +148,7 @@ with col1:
 
 # Right column: Interactive scatter plot
 with col2:
-    st.subheader("Serving configurations")
+    st.header("Serving configurations")
 
     # Create scatter plot (no title)
     fig = px.scatter(
