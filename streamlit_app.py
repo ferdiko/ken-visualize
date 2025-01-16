@@ -4,6 +4,8 @@ import numpy as np
 import plotly.express as px
 from streamlit_plotly_events import plotly_events
 from streamlit_theme import st_theme
+import plotly.graph_objects as go
+
 
 # Configure the page to use full width
 st.set_page_config(layout="wide")
@@ -12,6 +14,13 @@ st.set_page_config(layout="wide")
 np.random.seed(42)
 
 data_mt_bench = pd.read_json('data/mt_bench.json')
+
+# Generate random data for the line plot
+line_data = pd.DataFrame({
+    'x': np.arange(0, 10, 0.1),
+    'y': np.sin(np.arange(0, 10, 0.1))
+})
+
 
 
 # data_option_1 = pd.DataFrame({
@@ -56,20 +65,69 @@ col1, col2 = st.columns([2, 2.5])  # Adjust the proportions (e.g., 2:3 for left:
 # Left column: Text box
 with col1:    
     st.subheader("Deploy LLMs with Ken")
-    st.empty().text("Ken allows you to deploy and query LLMs without having to guesstimate which LLM best suits your application needs. To fit your precise needs, Ken offers a high-resolution cost-accuracy trade-off.")
+    st.empty().text('''Ken allows you to deploy and query LLMs without having to guesstimate which LLM best suits your application needs. \
+    To fit your precise needs, Ken offers a high-resolution cost-accuracy trade-off.
+    ''')
 
 # Dropdown menu to choose data (preserved outside column context)
 with col1:
+
+    st.markdown("#### Characterize your workload:", unsafe_allow_html=True)
+
     options = ["MT-Bench", "HellaSwag", "MMLU"]
+
     selected_option = st.selectbox("Choose a benchmark:", options)
 
-    # Advanced options
-    with st.expander("Declare workload and hardware"):
+    tmp_col1, tmp_col2, tmp_col3 = st.columns([2, 2, 3])
+
+    with tmp_col1:
+        nodes = st.number_input("Nodes:", min_value=1, step=1, value=1, help="Specify the number of nodes as an integer.")
+
+    with tmp_col2:
+        gpus_per_node = st.number_input("GPUs per node:", min_value=1, step=1, value=2, help="Specify the number of GPUs per node as an integer.")
+
+    with tmp_col3:
+        gpu_type = st.selectbox("GPU Type:", ["NVIDIA L40S",  "NVIDIA H100", "NVIDIA A100 (80GB)", "NVIDIA A100 (40GB)", "NVIDIA V100"], help="Select the GPU type for the nodes.")
+
+
+
+with col1:
+    with st.expander("Characterize your query load"):
         st.write('''
-            The chart above shows some numbers I picked for you.
-            I rolled actual dice for these, so they're *guaranteed* to
-            be random.
+            Characterize your query load for a more accurate latency estimation.
+            Either upload a file where each line corresponds to a queries-per-second value, 
+            or model your expected query load after a Poisson distribution.
         ''')
+
+        st.markdown("**Upload Queries-Per-Second file**", unsafe_allow_html=True)
+
+        # Upload button with tooltip
+        st.file_uploader("Each line in the file corresponds to one Queries-Per-Second value.", type=["csv"], help="Each line corresponds to 1 second of your query trace. The line denotes the number of queries received during that period.")
+
+        # Integer input field
+        st.markdown("**Or model query load after Poisson distribution**", unsafe_allow_html=True)
+    
+        lambda_value = st.number_input("Lambda (integer, higher value --> higher query load):", min_value=1, step=1, value=3, help="Lambda parameterizes the Poisson distribution.")
+
+        # Generate Poisson distribution data for 5 minutes (300 seconds)
+        time = np.arange(0, 300, 1)  # 300 seconds
+        poisson_data = np.random.poisson(lam=lambda_value, size=len(time))
+
+        # Line plot for Poisson distribution
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=time, y=poisson_data, mode='lines', name='Poisson Distribution'))
+        fig.update_layout(
+            xaxis_title="Time (seconds)",
+            yaxis_title="Queries per Second (QPS)",
+            template="plotly_white",
+            margin=dict(t=10, b=40, l=40, r=10)
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    # Section 2 title.
+    st.markdown("#### Query LLM:", unsafe_allow_html=True)
+
 
 # Map selected option to corresponding data
 if True or selected_option == "MT-Bench":
